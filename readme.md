@@ -28,7 +28,9 @@ Proyek ini bertujuan untuk mengatasi permasalahan tersebut dengan cakupan sebaga
 
 ### Persiapan
 
-**Sumber data:** Data yang digunakan adalah dataset internal karyawan yang berisi detail demografi, metrik terkait pekerjaan, dan status *attrition*. Sumber data ini didasarkan pada *IBM HR Analytics Employee Attrition & Performance dataset*.
+**Sumber data:** Datasetnya dari Dicoding di masukkan ke supabase*.
+
+**Akun Metabase** email: root@mail.com, password: root123
 
 **Setup environment:**
 Proses analisis data dan pembuatan model dilakukan menggunakan Python dengan beberapa pustaka utama sebagai berikut:
@@ -48,7 +50,7 @@ from sklearn.metrics import classification_report
 
 Sebuah *business dashboard* telah dibuat untuk membantu departemen HR Jaya Jaya Maju dalam memonitor tingkat *attrition* secara *real-time* dan memahami faktor-faktor pendorongnya secara visual.
 
-![Business Dashboard Attrition Karyawan](https://i.imgur.com/N6gQ0zH.jpg)
+![Business Dashboard Attrition Karyawan](dashboard.jpg)
 
 Dashboard ini berfokus pada tiga komponen utama:
 
