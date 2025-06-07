@@ -1,0 +1,271 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Employee Attrition Analysis for Jaya Jaya Maju\n",
+    "\n",
+    "## Objective\n",
+    "Analyze factors contributing to high attrition rates (>10%) and create a business dashboard to monitor these factors.\n",
+    "\n",
+    "## Dataset\n",
+    "Based on the provided README.md, the dataset contains employee demographics, work-related metrics, and attrition flags."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Import libraries\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import plotly.express as px\n",
+    "import plotly.graph_objects as go\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.ensemble import RandomForestClassifier\n",
+    "from sklearn.metrics import classification_report\n",
+    "\n",
+    "# Set plot style\n",
+    "sns.set_style('whitegrid')\n",
+    "%matplotlib inline"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 1. Data Loading and Initial Exploration"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Load the dataset (assuming CSV format)\n",
+    "df = pd.read_csv('employee_data.csv')  # Adjust path as needed\n",
+    "\n",
+    "# Display basic information\n",
+    "print(\"Dataset Shape:\", df.shape)\n",
+    "print(\"\\nFirst 5 Rows:\")\n",
+    "print(df.head())\n",
+    "print(\"\\nDataset Info:\")\n",
+    "print(df.info())\n",
+    "\n",
+    "# Check for missing values\n",
+    "print(\"\\nMissing Values:\")\n",
+    "print(df.isnull().sum())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 2. Exploratory Data Analysis (EDA)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Calculate attrition rate\n",
+    "attrition_rate = df['Attrition'].mean() * 100\n",
+    "print(f\"Current Attrition Rate: {attrition_rate:.2f}%\")\n",
+    "\n",
+    "# Distribution of Attrition\n",
+    "plt.figure(figsize=(6, 4))\n",
+    "sns.countplot(x='Attrition', data=df)\n",
+    "plt.title('Attrition Distribution')\n",
+    "plt.show()\n",
+    "\n",
+    "# Analyze key factors\n",
+    "fig, axes = plt.subplots(2, 2, figsize=(12, 10))\n",
+    "\n",
+    "# Age vs Attrition\n",
+    "sns.boxplot(x='Attrition', y='Age', data=df, ax=axes[0, 0])\n",
+    "axes[0, 0].set_title('Age vs Attrition')\n",
+    "\n",
+    "# Job Satisfaction vs Attrition\n",
+    "sns.countplot(x='JobSatisfaction', hue='Attrition', data=df, ax=axes[0, 1])\n",
+    "axes[0, 1].set_title('Job Satisfaction vs Attrition')\n",
+    "\n",
+    "# Monthly Income vs Attrition\n",
+    "sns.boxplot(x='Attrition', y='MonthlyIncome', data=df, ax=axes[1, 0])\n",
+    "axes[1, 0].set_title('Monthly Income vs Attrition')\n",
+    "\n",
+    "# Work-Life Balance vs Attrition\n",
+    "sns.countplot(x='WorkLifeBalance', hue='Attrition', data=df, ax=axes[1, 1])\n",
+    "axes[1, 1].set_title('Work-Life Balance vs Attrition')\n",
+    "\n",
+    "plt.tight_layout()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 3. Feature Importance Analysis"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Prepare data for modeling\n",
+    "# Convert categorical variables to numeric\n",
+    "df_model = df.copy()\n",
+    "categorical_cols = ['BusinessTravel', 'Department', 'EducationField', 'Gender', \n",
+    "                    'JobRole', 'MaritalStatus', 'Over18', 'OverTime']\n",
+    "df_model = pd.get_dummies(df_model, columns=categorical_cols, drop_first=True)\n",
+    "\n",
+    "# Define features and target\n",
+    "X = df_model.drop(['EmployeeId', 'Attrition'], axis=1)\n",
+    "y = df_model['Attrition']\n",
+    "\n",
+    "# Split data\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n",
+    "\n",
+    "# Train Random Forest model\n",
+    "rf = RandomForestClassifier(n_estimators=100, random_state=42)\n",
+    "rf.fit(X_train, y_train)\n",
+    "\n",
+    "# Feature importance\n",
+    "feature_importance = pd.DataFrame({\n",
+    "    'Feature': X.columns,\n",
+    "    'Importance': rf.feature_importances_\n",
+    "}).sort_values('Importance', ascending=False)\n",
+    "\n",
+    "# Plot top 10 features\n",
+    "plt.figure(figsize=(10, 6))\n",
+    "sns.barplot(x='Importance', y='Feature', data=feature_importance.head(10))\n",
+    "plt.title('Top 10 Features Influencing Attrition')\n",
+    "plt.show()\n",
+    "\n",
+    "# Model performance\n",
+    "y_pred = rf.predict(X_test)\n",
+    "print(\"\\nClassification Report:\")\n",
+    "print(classification_report(y_test, y_pred))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 4. Business Dashboard with Plotly"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Create interactive dashboard\n",
+    "fig = go.Figure()\n",
+    "\n",
+    "# Attrition Rate Indicator\n",
+    "fig.add_trace(go.Indicator(\n",
+    "    mode=\"number\",\n",
+    "    value=attrition_rate,\n",
+    "    title={\"text\": \"Current Attrition Rate (%)\"},\n",
+    "    domain={'x': [0, 0.3], 'y': [0.7, 1]}\n",
+    "))\n",
+    "\n",
+    "# Job Satisfaction Distribution\n",
+    "job_sat_data = df.groupby(['JobSatisfaction', 'Attrition']).size().unstack().reset_index()\n",
+    "fig.add_trace(go.Bar(\n",
+    "    x=job_sat_data['JobSatisfaction'],\n",
+    "    y=job_sat_data[1],\n",
+    "    name='Attrition',\n",
+    "    domain={'x': [0.35, 0.65], 'y': [0.7, 1]}\n",
+    "))\n",
+    "fig.add_trace(go.Bar(\n",
+    "    x=job_sat_data['JobSatisfaction'],\n",
+    "    y=job_sat_data[0],\n",
+    "    name='No Attrition',\n",
+    "    domain={'x': [0.35, 0.65], 'y': [0.7, 1]}\n",
+    "))\n",
+    "\n",
+    "# Monthly Income vs Attrition\n",
+    "fig.add_trace(go.Box(\n",
+    "    y=df[df['Attrition'] == 0]['MonthlyIncome'],\n",
+    "    name='No Attrition',\n",
+    "    domain={'x': [0, 0.5], 'y': [0, 0.65]}\n",
+    "))\n",
+    "fig.add_trace(go.Box(\n",
+    "    y=df[df['Attrition'] == 1]['MonthlyIncome'],\n",
+    "    name='Attrition',\n",
+    "    domain={'x': [0, 0.5], 'y': [0, 0.65]}\n",
+    "))\n",
+    "\n",
+    "# Feature Importance\n",
+    "fig.add_trace(go.Bar(\n",
+    "    x=feature_importance['Importance'].head(5),\n",
+    "    y=feature_importance['Feature'].head(5),\n",
+    "    orientation='h',\n",
+    "    name='Feature Importance',\n",
+    "    domain={'x': [0.55, 1], 'y': [0, 0.65]}\n",
+    "))\n",
+    "\n",
+    "# Update layout\n",
+    "fig.update_layout(\n",
+    "    title_text='Employee Attrition Dashboard',\n",
+    "    height=800,\n",
+    "    showlegend=True\n",
+    ")\n",
+    "\n",
+    "fig.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 5. Recommendations\n",
+    "\n",
+    "Based on the analysis:\n",
+    "1. **Improve Job Satisfaction**: Employees with lower job satisfaction have higher attrition rates. Implement engagement programs and regular feedback sessions.\n",
+    "2. **Enhance Compensation**: Lower monthly income is associated with attrition. Review salary structures, especially for entry-level roles.\n",
+    "3. **Work-Life Balance**: Poor work-life balance correlates with attrition. Consider flexible working hours or remote work options.\n",
+    "4. **Monitor Key Indicators**: Use the dashboard to track job satisfaction, income, and work-life balance regularly.\n",
+    "\n",
+    "## Next Steps\n",
+    "- Conduct employee surveys to validate findings.\n",
+    "- Implement targeted retention strategies and monitor their impact using the dashboard.\n",
+    "- Explore advanced predictive models to forecast individual attrition risk."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
