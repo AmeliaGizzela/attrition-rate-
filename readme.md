@@ -84,7 +84,7 @@ Dashboard ini bertujuan untuk:
 
 ### Screenshot
 
-[<img src="https://github.com/AmeliaGizzela/attririon-rate-/AmeliaGizzela-dashboard.png" width="60px;"/>]([https://github.com/AmeliaGizzela/attririon-rate-/AmeliaGizzela-dashboard.png)
+![Business Dashboard Attrition Karyawan](AmeliaGizzela-dashboard.jpg)
 
 
 Untuk memonitor faktor-faktor yang mempengaruhi atrisi, sebuah business dashboard dapat dibuat. Dashboard ini akan berfungsi sebagai alat pemantauan bagi manajemen untuk melacak indikator-indikator kunci secara berkala.
