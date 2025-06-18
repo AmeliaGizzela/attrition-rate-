@@ -84,7 +84,7 @@ Dashboard ini bertujuan untuk:
 
 ### Screenshot
 
-![Dashboard Attrition di Metabase](.AmeliaGizzela_dashboard.png)
+![Dashboard Attrition di Metabase](AmeliaGizzela_dashboard.png)
 
 
 Untuk memonitor faktor-faktor yang mempengaruhi atrisi, sebuah business dashboard dapat dibuat. Dashboard ini akan berfungsi sebagai alat pemantauan bagi manajemen untuk melacak indikator-indikator kunci secara berkala.
